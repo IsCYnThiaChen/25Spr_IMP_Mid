@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -23,6 +24,8 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public int score = 0;
 
+    private bool levelTransitioned = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -39,6 +42,15 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (score > 250 && !levelTransitioned)
+        {
+            // Transition to level 2 (you can use the actual name of your next scene)
+            LoadNextLevel();
+
+            // Set the flag to true to ensure it only happens once
+            levelTransitioned = true;
+        }
+
         //Create coins
         if (timer > timerTotal)
         {
@@ -51,23 +63,12 @@ public class GameManager : MonoBehaviour
         {
             timer += Time.deltaTime;
         }
-
-        /*
-        //Mouse click detection
-        if (Input.GetMouseButtonUp(0))
-        {
-            Vector2 touchUpPos = Input.mousePosition;
-            Ray currentRay = mainCamera.ScreenPointToRay(touchUpPos);
-            RaycastHit hit;
-            if (Physics.Raycast(currentRay, out hit, 3000, rayLayerMask_Floor))
-            {
-                player.MoveTo(hit.point);
-            }
-        }
-        */
-
         //Update UI
         text_Score.text = "<color=#000fff>Score: </color>" + score;
     }
-
+    private void LoadNextLevel()
+    {
+        // Load the next scene (Assuming the next level is named "Level2")
+        SceneManager.LoadScene("Level2");  // Change "Level2" to your scene's name
+    }
 }

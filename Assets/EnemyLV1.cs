@@ -14,7 +14,7 @@ public class EnemyLV1 : EnemyBase
 
     public override void Damaged(int damage)
     {
-        damage = 3;
+        damage = 10;
         gameManager.score = Mathf.Max(0, gameManager.score - damage);
         Debug.Log("lose point");
         if (hp == 0)
