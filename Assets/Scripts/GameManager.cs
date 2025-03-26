@@ -26,7 +26,7 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        for (int i = 0; i < 1000; i++)
+        for (int i = 0; i < 300; i++)
         {
             timer = 0;
             GameObject coin = Instantiate(coinPrefab);
@@ -44,7 +44,7 @@ public class GameManager : MonoBehaviour
         {
             timer = 0;
             GameObject coin = Instantiate(coinPrefab);
-            Vector3 v3 = new Vector3(Random.Range(-10f, 10f), 30, Random.Range(-10f, 10f));
+            Vector3 v3 = new Vector3(Random.Range(-10f, 10f), 10, Random.Range(-10f, 10f));
             coin.transform.position = v3;
         }
         else
@@ -52,6 +52,7 @@ public class GameManager : MonoBehaviour
             timer += Time.deltaTime;
         }
 
+        /*
         //Mouse click detection
         if (Input.GetMouseButtonUp(0))
         {
@@ -63,6 +64,7 @@ public class GameManager : MonoBehaviour
                 player.MoveTo(hit.point);
             }
         }
+        */
 
         //Update UI
         text_Score.text = "<color=#000fff>Score: </color>" + score;

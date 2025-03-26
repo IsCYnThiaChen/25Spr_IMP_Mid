@@ -14,10 +14,40 @@ public class PlayerController : MonoBehaviour
     private Vector3 startPos;
     private float movementTimer = 0;
 
+    private float moveSpeed = 10f; // Speed of movement
+    private Vector3 moveDirection = Vector3.zero; // Current movement direction
+
+
+    // Player shoot bullets
+    [SerializeField]
+    private GameObject bulletPrefab;
+    [SerializeField]
+    private Transform bulletSpawnPoint;
+
+    private float lastShotTime = -1f;
+    private float shootCooldown = 1f;
+
+    private GameObject bulletPreview;
+
+
     private void Start()
-    {
-        currentTarget = Vector3.up * 0.5f;
+    {   
+        /*
+        if (bulletPrefab != null && bulletSpawnPoint != null)
+        {
+            bulletPreview = Instantiate(bulletPrefab, bulletSpawnPoint.position, bulletSpawnPoint.rotation);
+            bulletPreview.SetActive(true); // Make sure the bullet preview is active
+            Rigidbody bulletRb = bulletPreview.GetComponent<Rigidbody>();
+
+            // Stop the bullet preview from moving by removing its velocity
+            if (bulletRb != null)
+            {
+                bulletRb.velocity = Vector3.zero;
+            }
+        }
+        */
     }
+
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Coin"))
@@ -27,69 +57,107 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Move to this location
-    /// </summary>
-    /// <param name="newTarget">Add new target position</param>
-    public void MoveTo(Vector3 newTarget)
-    {
-        startPos = transform.position;
-        currentTarget = newTarget + Vector3.up * 0.5f;
-
-        //Extra: For Ease Movement Mode
-        movementTimer = 0;
-    }
-
     private void Update()
     {
-        //Default moving direction
-        Vector3 targetDistance = currentTarget - transform.position;
-        targetDistance.y = 0;
-        Vector3 moveDirection = targetDistance.normalized;
+        // Handle WASD movement
+        HandleMovementInput();
 
-        Vector3 newPos = Vector3.zero;
-        if (movingPatterns == MovingPatterns.Teleport)
-        {
-            newPos = currentTarget;
-        }
-        else if (movingPatterns == MovingPatterns.Straight)
-        {
-            Vector3 moveVector = moveDirection * 10f * Time.deltaTime;
-            if (moveVector.sqrMagnitude > targetDistance.sqrMagnitude)
-            {
-                //Reached target
-                newPos = currentTarget;
-            }
-            else
-            {
-                //Keep moving in average speed
-                newPos = transform.position + moveVector;
-            }
-        }
-        else if (movingPatterns == MovingPatterns.Lerp)
-        {
-            //Lerp: a + (b - a) * t
-            newPos = Vector3.Lerp(transform.position, currentTarget, 2f * Time.deltaTime);
-        }
-        else if (movingPatterns == MovingPatterns.EaseIn)
-        {
-            //Extra: Using easing algorithm from https://easings.net/
-            movementTimer = Mathf.Min(1, movementTimer + Time.deltaTime);
-            newPos = startPos + (currentTarget - startPos) * (1 - Mathf.Cos((movementTimer * Mathf.PI) / 2));
-        }
-        else if (movingPatterns == MovingPatterns.EaseInAndOut)
-        {
-            //Extra: Using easing algorithm from https://easings.net/
-            movementTimer = Mathf.Min(1, movementTimer + Time.deltaTime * 0.5f);
-            newPos = startPos + (currentTarget - startPos) * -(Mathf.Cos(Mathf.PI * movementTimer) - 1) / 2;
-        }
+        // Move player based on the calculated direction
+        Vector3 newPos = transform.position + moveDirection * moveSpeed * Time.deltaTime;
 
-
-
+        // Apply new position to the player's transform
         transform.position = newPos;
+
+        // Update rotation to face the move direction (if any movement is happening)
         if (moveDirection != Vector3.zero)
         {
             transform.rotation = Quaternion.LookRotation(moveDirection, Vector3.up);
         }
+
+        HandleShooting();
+    }
+
+    /// <summary>
+    /// Handles movement input for WASD keys
+    /// </summary>
+    private void HandleMovementInput()
+    {
+        moveDirection = Vector3.zero;  // Reset the direction every frame
+
+        // Detect input from WASD keys and set the corresponding movement direction
+        if (Input.GetKey(KeyCode.W))
+        {
+            moveDirection += Vector3.forward; // Move forward
+        }
+        if (Input.GetKey(KeyCode.S))
+        {
+            moveDirection += Vector3.back; // Move backward
+        }
+        if (Input.GetKey(KeyCode.A))
+        {
+            moveDirection += Vector3.left; // Move left
+        }
+        if (Input.GetKey(KeyCode.D))
+        {
+            moveDirection += Vector3.right; // Move right
+        }
+
+        moveDirection.Normalize(); // Normalize to avoid faster movement when pressing multiple keys
+    }
+
+    /// <summary>
+    /// Handles shooting mechanics when space bar is pressed
+    /// </summary>
+    private void HandleShooting()
+    {
+        // Check if the space bar is pressed and the cooldown has passed
+        if (Input.GetKeyDown(KeyCode.Space) && Time.time - lastShotTime >= shootCooldown)
+        {
+            // Shoot a bullet
+            ShootBullet();
+
+            // Update the last shot time
+            lastShotTime = Time.time;
+        }
+    }
+
+    /// <summary>
+    /// Instantiates and shoots a bullet
+    /// </summary>
+    private void ShootBullet()
+    {
+        if (bulletPrefab != null && bulletSpawnPoint != null)
+        {
+            // Get the mouse position on the screen
+            Vector3 mousePosition = Input.mousePosition;
+            Debug.Log(mousePosition);
+
+            // Convert the mouse position to a point in the world
+            Ray ray = Camera.main.ScreenPointToRay(mousePosition);
+            RaycastHit hit;
+
+            // Calculate the direction towards the mouse (along the ray)
+            Vector3 targetDirection = ray.direction;
+
+            // Instantiate the bullet at the spawn point and set its rotation to a fixed value (no rotation)
+            GameObject bullet = Instantiate(bulletPrefab, bulletSpawnPoint.position, Quaternion.identity); // No rotation
+            
+            Rigidbody bulletRb = bullet.GetComponent<Rigidbody>();
+            if (bulletRb != null)
+            {
+                // Add a force to the bullet to make it move (this assumes the bullet prefab has a Rigidbody)
+                bulletRb.AddForce(-Vector3.forward * 20f, ForceMode.Impulse); // Adjust the force and speed as needed
+            }
+
+            StartCoroutine(DestroyBulletAfterTime(bullet, 4f));
+        }
+    }
+    // <summary>
+    /// Destroys the bullet after a certain amount of time.
+    /// </summary>
+    private IEnumerator DestroyBulletAfterTime(GameObject bullet, float time)
+    {
+        yield return new WaitForSeconds(time);
+        Destroy(bullet); // Destroy the bullet after the specified time
     }
 }
