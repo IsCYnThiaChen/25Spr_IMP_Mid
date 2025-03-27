@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -42,13 +43,21 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (score > 250 && !levelTransitioned)
+        if (SceneManager.GetActiveScene().name == "SampleScene" 
+            && score > 200 && !levelTransitioned)
         {
             // Transition to level 2 (you can use the actual name of your next scene)
             LoadNextLevel();
 
             // Set the flag to true to ensure it only happens once
             levelTransitioned = true;
+        }
+
+        if (SceneManager.GetActiveScene().name == "Level2"
+            && score > 250 && levelTransitioned)
+        {
+            SceneManager.LoadScene("EndLevel");
+
         }
 
         //Create coins
