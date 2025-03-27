@@ -29,23 +29,13 @@ public class PlayerController : MonoBehaviour
 
     private GameObject bulletPreview;
 
+    public AudioSource audioSource;
+    public AudioClip soundClip;
+
 
     private void Start()
-    {   
-        /*
-        if (bulletPrefab != null && bulletSpawnPoint != null)
-        {
-            bulletPreview = Instantiate(bulletPrefab, bulletSpawnPoint.position, bulletSpawnPoint.rotation);
-            bulletPreview.SetActive(true); // Make sure the bullet preview is active
-            Rigidbody bulletRb = bulletPreview.GetComponent<Rigidbody>();
+    {
 
-            // Stop the bullet preview from moving by removing its velocity
-            if (bulletRb != null)
-            {
-                bulletRb.velocity = Vector3.zero;
-            }
-        }
-        */
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -115,6 +105,7 @@ public class PlayerController : MonoBehaviour
         {
             // Shoot a bullet
             ShootBullet();
+            audioSource.PlayOneShot(soundClip);
 
             // Update the last shot time
             lastShotTime = Time.time;
@@ -128,6 +119,7 @@ public class PlayerController : MonoBehaviour
     {
         if (bulletPrefab != null && bulletSpawnPoint != null)
         {
+
             // Get the mouse position on the screen
             Vector3 mousePosition = Input.mousePosition;
             Debug.Log(mousePosition);
