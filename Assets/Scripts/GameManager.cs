@@ -22,6 +22,8 @@ public class GameManager : MonoBehaviour
     private float timer = 0;
     private float timerTotal = 1;
 
+    private float timeSinceStart = 0;
+
     [HideInInspector]
     public int score = 0;
 
@@ -43,17 +45,30 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (SceneManager.GetActiveScene().name == "SampleScene" 
+        timeSinceStart += Time.timeScale;
+
+        if (score <= 0 && timeSinceStart > 800)
+        {
+            RestartScene();
+        }
+            if (SceneManager.GetActiveScene().name == "SampleScene" 
             && score > 200 && !levelTransitioned)
         {
             // Transition to level 2 (you can use the actual name of your next scene)
-            LoadNextLevel();
+            SceneManager.LoadScene("Level2");
 
             // Set the flag to true to ensure it only happens once
             levelTransitioned = true;
         }
 
         if (SceneManager.GetActiveScene().name == "Level2"
+            && score > 250 && levelTransitioned)
+        {
+            SceneManager.LoadScene("Level3");
+
+        }
+
+        if (SceneManager.GetActiveScene().name == "Level3"
             && score > 250 && levelTransitioned)
         {
             SceneManager.LoadScene("EndLevel");
@@ -75,9 +90,9 @@ public class GameManager : MonoBehaviour
         //Update UI
         text_Score.text = "<color=#000fff>Score: </color>" + score;
     }
-    private void LoadNextLevel()
+    public void RestartScene()
     {
-        // Load the next scene (Assuming the next level is named "Level2")
-        SceneManager.LoadScene("Level2");  // Change "Level2" to your scene's name
+        string currentSceneName = SceneManager.GetActiveScene().name;
+        SceneManager.LoadScene(currentSceneName);
     }
 }

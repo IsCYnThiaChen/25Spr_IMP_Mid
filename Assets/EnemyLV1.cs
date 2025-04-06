@@ -16,10 +16,5 @@ public class EnemyLV1 : EnemyBase
     {
         damage = 10;
         gameManager.score = Mathf.Max(0, gameManager.score - damage);
-        Debug.Log("lose point");
-        if (hp == 0)
-        {
-            Death();
-        }
     }
 }

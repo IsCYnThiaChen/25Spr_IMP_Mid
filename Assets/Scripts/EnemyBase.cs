@@ -11,7 +11,7 @@ public class EnemyBase : MonoBehaviour
     protected float hpTotal = 100;
     private float timer = 0f;
     [SerializeField]
-    private float timerTotal = 1f;
+    protected float timerTotal = 1f;
     [SerializeField]
     protected GameManager gameManager;
 
